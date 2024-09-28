@@ -7,8 +7,27 @@ const {
   validateUserSignup,
   validateUserUpdate,
 } = require("./utils/validation");
+const cookieParser = require("cookie-parser");
+const {userAuth} = require('./middlewares/auth')
 
 app.use(express.json());
+app.use(cookieParser());
+
+//get profile of the user
+app.get("/profile",userAuth,async (req, res) => {
+  try {
+    res.send(req.currentUser);
+  } catch (error) { 
+    res.send("Error: " + error.message);
+  }
+});
+
+//send connection request
+
+app.post("sendConnectionRequest",userAuth,(req,res)=>{
+  const currentUser = req.currentUser
+  res.send(currentUser.firstName+"sent a connection request");
+})
 
 //user signup
 app.post("/signup", async (req, res) => {
@@ -30,17 +49,21 @@ app.post("/signup", async (req, res) => {
   }
 });
 
+//login a user
 app.post("/login", async (req, res) => {
-  console.log(req.body);
   const { emailId, password } = req.body;
   const user = await User.findOne({ emailId: emailId });
   try {
+    //checks if email is valid
     if (!user) {
       throw new Error("Invalid Credentials");
     } else {
-      console.log(password, user.password);
+      //checks if password is valid
       const isPasswordCorrect = await bcrypt.compare(password, user.password);
       if (isPasswordCorrect) {
+        //creates a token
+        const token = jwt.sign({ _id: user._id }, "Nandakishor@Earth$1029");
+        res.cookie("token", token);
         res.send("Login Success");
       } else {
         throw new Error("Invalid Credentials");
