@@ -8,13 +8,23 @@ app.use(express.json());
 //user signup
 app.post("/signup", async (req, res) => {
   //creating a new instance of a the UserModel
-  const user = new User(req.body);
 
   try {
+    const data = req.body;
+    const user = new User(data);
+    const requiredFields = ["firstName", "lastName", "emailId", "password"];
+
+    const isrequiredFeilds = Object.keys(data).every((k) => {
+      return requiredFields.includes(k);
+    });
+
+    if (!isrequiredFeilds) {
+      throw new Error("req format error");
+    }
     await user.save();
     res.send("User info added succesfully");
   } catch (error) {
-    res.status(400).send("Error saving the instance");
+    res.status(400).send("Creating new User Failed. " + error.message);
   }
 });
 
@@ -53,16 +63,37 @@ app.delete("/user", async (req, res) => {
   }
 });
 
-//update user LastName
-app.patch("/user", async (req, res) => {
+//update user
+app.patch("/user/:id", async (req, res) => {
+  const userId = req.params.id;
+  const data = req.body;
+
   try {
-    const usersList = await User.updateOne({
-      firstName: "Nandakishor",
-      lastName: "A.S",
+    const allowedUpdateFields = [
+      "profileUrl",
+      "about",
+      "age",
+      "skills",
+      "password",
+    ];
+
+    const isUpdateAllowed = Object.keys(data).every((k) => {
+      return allowedUpdateFields.includes(k);
     });
+
+    if (!isUpdateAllowed) {
+      throw new Error("Cannot Update the provided fields.");
+    }
+    const usersList = await User.updateMany(
+      {
+        _id: userId,
+      },
+      data,
+      { runValidators: true }
+    );
     res.send(usersList);
   } catch (error) {
-    res.status(400).send("Error fetching the user info" + error);
+    res.status(400).send("Update Failed." + error.message);
   }
 });
 
