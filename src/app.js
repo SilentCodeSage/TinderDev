@@ -2,29 +2,52 @@ const express = require("express");
 const app = express();
 const connectDB = require("./config/database");
 const User = require("./models/user");
+const bcrypt = require("bcrypt");
+const {
+  validateUserSignup,
+  validateUserUpdate,
+} = require("./utils/validation");
 
 app.use(express.json());
 
 //user signup
 app.post("/signup", async (req, res) => {
   //creating a new instance of a the UserModel
-
   try {
-    const data = req.body;
-    const user = new User(data);
-    const requiredFields = ["firstName", "lastName", "emailId", "password"];
-
-    const isrequiredFeilds = Object.keys(data).every((k) => {
-      return requiredFields.includes(k);
+    const { firstName, lastName, emailId, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: hashedPassword,
     });
-
-    if (!isrequiredFeilds) {
-      throw new Error("req format error");
-    }
+    validateUserSignup(req.body);
     await user.save();
     res.send("User info added succesfully");
   } catch (error) {
     res.status(400).send("Creating new User Failed. " + error.message);
+  }
+});
+
+app.post("/login", async (req, res) => {
+  console.log(req.body);
+  const { emailId, password } = req.body;
+  const user = await User.findOne({ emailId: emailId });
+  try {
+    if (!user) {
+      throw new Error("Invalid Credentials");
+    } else {
+      console.log(password, user.password);
+      const isPasswordCorrect = await bcrypt.compare(password, user.password);
+      if (isPasswordCorrect) {
+        res.send("Login Success");
+      } else {
+        throw new Error("Invalid Credentials");
+      }
+    }
+  } catch (error) {
+    res.send("Error: " + error.message);
   }
 });
 
@@ -63,27 +86,13 @@ app.delete("/user", async (req, res) => {
   }
 });
 
-//update user
+//update the user
 app.patch("/user/:id", async (req, res) => {
   const userId = req.params.id;
   const data = req.body;
 
   try {
-    const allowedUpdateFields = [
-      "profileUrl",
-      "about",
-      "age",
-      "skills",
-      "password",
-    ];
-
-    const isUpdateAllowed = Object.keys(data).every((k) => {
-      return allowedUpdateFields.includes(k);
-    });
-
-    if (!isUpdateAllowed) {
-      throw new Error("Cannot Update the provided fields.");
-    }
+    validateUserUpdate(data);
     const usersList = await User.updateMany(
       {
         _id: userId,
