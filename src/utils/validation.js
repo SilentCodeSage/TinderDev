@@ -28,4 +28,30 @@ const validateUserUpdate = (data) => {
   }
 };
 
-module.exports = {validateUserSignup,validateUserUpdate};
+const validateProfileEdit = (req) =>{
+  const allowedEditFields = ["firstName","lastName","emailId","profileUrl","gender","age","about","skills"];
+
+  const isEditAllowed = Object.keys(req.body).every((k)=>{
+    return allowedEditFields.includes(k);
+  });
+
+  if(!isEditAllowed){
+    throw new Error("Cannot Update the provided Feilds");
+  }
+
+}
+
+const validateProfileEditPassword = (req) =>{
+  const allowedEditFields = ["password"];
+
+  const isEditAllowed = Object.keys(req.body).every((k)=>{
+    return allowedEditFields.includes(k);
+  });
+
+  if(!isEditAllowed){
+    throw new Error("Cannot Update the provided Feilds");
+  }
+
+}
+
+module.exports = {validateUserSignup,validateUserUpdate,validateProfileEdit,validateProfileEditPassword};
