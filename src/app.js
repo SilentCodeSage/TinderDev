@@ -10,69 +10,16 @@ const {
 const cookieParser = require("cookie-parser");
 const { userAuth } = require("./middlewares/auth");
 const jwt = require("jsonwebtoken");
+const authRouter = require("./routes/auth");
+const requestsRouter = require("./routes/requests");
+const profileRouter = require("./routes/profile");
 
 app.use(express.json());
 app.use(cookieParser());
 
-//get profile of the user
-app.get("/profile", userAuth, async (req, res) => {
-  try {
-    res.send(req.currentUser);
-  } catch (error) {
-    res.send("Error: " + error.message);
-  }
-});
-
-//send connection request
-app.post("sendConnectionRequest", userAuth, (req, res) => {
-  const currentUser = req.currentUser;
-  res.send(currentUser.firstName + "sent a connection request");
-});
-
-//user signup
-app.post("/signup", async (req, res) => {
-  //creating a new instance of a the UserModel
-  try {
-    const { firstName, lastName, emailId, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({
-      firstName,
-      lastName,
-      emailId,
-      password: hashedPassword,
-    });
-    validateUserSignup(req.body);
-    await user.save();
-    res.send("User info added succesfully");
-  } catch (error) {
-    res.status(400).send("Creating new User Failed. " + error.message);
-  }
-});
-
-//login a user
-app.post("/login", async (req, res) => {
-  const { emailId, password } = req.body;
-  const user = await User.findOne({ emailId: emailId });
-  try {
-    //checks if email is valid
-    if (!user) {
-      throw new Error("Invalid Credentials");
-    } else {
-      //checks if password is valid
-      const isPasswordCorrect = await user.PasswordValidator(password)
-      if (isPasswordCorrect) {
-        //creates a token by ofloading the token creation logic to shcema method
-        const token = await user.getJWT();
-        res.cookie("token", token);
-        res.send("Login Successfull");
-      } else {
-        throw new Error("Invalid Credentials");
-      }
-    }
-  } catch (error) {
-    res.send("Error: " + error.message);
-  }
-});
+app.use("/",authRouter);
+app.use("/",profileRouter);
+app.use("/",requestsRouter);
 
 //view specific user info
 app.get("/user", async (req, res) => {
