@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
-const validator = require('validator');
+const validator = require("validator");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const UserSchema = mongoose.Schema(
   {
@@ -19,26 +21,26 @@ const UserSchema = mongoose.Schema(
       required: true,
       unique: true,
       lowercase: true,
-      validate(value){
-        if(!(validator.isEmail(value))){
+      validate(value) {
+        if (!validator.isEmail(value)) {
           throw new Error("Invalid Email Id");
         }
-      }
+      },
     },
-    password: { 
+    password: {
       type: String,
       required: true,
-      validate(value){
-        if(!(validator.isStrongPassword(value))){
+      validate(value) {
+        if (!validator.isStrongPassword(value)) {
           throw new Error("Weak password Enter a strong password");
         }
-      }
+      },
     },
     age: {
       type: Number,
       min: 18,
       validate(value) {
-        if (value <  18) {
+        if (value < 18) {
           throw new Error("You must be atleast 18 years old.");
         }
       },
@@ -69,5 +71,17 @@ const UserSchema = mongoose.Schema(
     timestamps: true,
   }
 );
+
+UserSchema.methods.getJWT = async function () {
+  const user = this;
+  const token = jwt.sign({ _id: user._id }, "Nandakishor@Earth$1029");
+  return token;
+};
+
+UserSchema.methods.PasswordValidator = async function (userInputPassword) {
+  const user = this;
+  const isPasswordCorrect = await bcrypt.compare(userInputPassword,this.password);
+  return isPasswordCorrect;
+};
 
 module.exports = mongoose.model("User", UserSchema);
