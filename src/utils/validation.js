@@ -28,30 +28,44 @@ const validateUserUpdate = (data) => {
   }
 };
 
-const validateProfileEdit = (req) =>{
-  const allowedEditFields = ["firstName","lastName","emailId","profileUrl","gender","age","about","skills"];
+const validateProfileEdit = (req) => {
+  const allowedEditFields = [
+    "firstName",
+    "lastName",
+    "emailId",
+    "profileUrl",
+    "gender",
+    "age",
+    "about",
+    "skills",
+  ];
 
-  const isEditAllowed = Object.keys(req.body).every((k)=>{
+  const isEditAllowed = Object.keys(req.body).every((k) => {
     return allowedEditFields.includes(k);
   });
 
-  if(!isEditAllowed){
+  if (!isEditAllowed) {
     throw new Error("Cannot Update the provided Feilds");
   }
+};
 
-}
-
-const validateProfileEditPassword = (req) =>{
+const validateProfileEditPassword = (req) => {
   const allowedEditFields = ["password"];
 
-  const isEditAllowed = Object.keys(req.body).every((k)=>{
+  const isEditAllowed = Object.keys(req.body).every((k) => {
     return allowedEditFields.includes(k);
   });
 
-  if(!isEditAllowed){
-    throw new Error("Cannot Update the provided Feilds");
+  if (!isEditAllowed) {
+    throw new Error(
+      "Cannot Update the provided Feilds.Provide only password feild"
+    );
   }
+};
 
-}
-
-module.exports = {validateUserSignup,validateUserUpdate,validateProfileEdit,validateProfileEditPassword};
+module.exports = {
+  validateUserSignup,
+  validateUserUpdate,
+  validateProfileEdit,
+  validateProfileEditPassword,
+};

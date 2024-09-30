@@ -7,6 +7,7 @@ const {
 } = require("../utils/validation");
 const bcrypt = require("bcrypt");
 
+//view the currently logged user profile
 profileRouter.get("/profile/view", userAuth, async (req, res) => {
   try {
     res.send(req.currentUser);
@@ -15,6 +16,7 @@ profileRouter.get("/profile/view", userAuth, async (req, res) => {
   }
 });
 
+//Edit the user profile
 profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
   try {
     validateProfileEdit(req);
@@ -31,7 +33,8 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
   }
 });
 
-profileRouter.patch("/profile/password", userAuth, async (req, res) => {
+//Change the password
+profileRouter.patch("/profile/changePassword", userAuth, async (req, res) => {
   try {
     validateProfileEditPassword(req);
     const currentUser = req.currentUser;

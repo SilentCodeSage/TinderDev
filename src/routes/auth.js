@@ -4,6 +4,7 @@ const authRouter = express.Router();
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 
+//create a user
 authRouter.post("/signup", async (req, res) => {
   //creating a new instance of a the UserModel
   try {
@@ -23,6 +24,8 @@ authRouter.post("/signup", async (req, res) => {
   }
 });
 
+
+//login user
 authRouter.post("/login", async (req, res) => {
   const { emailId, password } = req.body;
   const user = await User.findOne({ emailId: emailId });
@@ -47,6 +50,7 @@ authRouter.post("/login", async (req, res) => {
   }
 });
 
+//logout user
 authRouter.post("/logout", async(req,res) =>{
     res.clearCookie("token");
     res.send("User Logged Out Succesfully");
