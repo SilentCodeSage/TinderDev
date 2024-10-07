@@ -14,12 +14,12 @@ const userAuth = async (req, res, next) => {
 
     if (!currentUser) {
       throw new Error("User not Found");
-    } 
+    }
 
-        req.currentUser = currentUser;
-        next();
+    req.currentUser = currentUser;
+    next();
   } catch (error) {
-    res.send("Error: "+error.message);
+    res.send("Error: " + error.message);
   }
 };
 
