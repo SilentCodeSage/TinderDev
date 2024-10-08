@@ -69,6 +69,10 @@ userRouter.get("/feed", userAuth, async (req, res) => {
   try {
     const currentUser = req.currentUser;
 
+    const page = parseInt(req.query.page) | 1;
+    const limit = parseInt(req.query.limit) | 10;
+    skip = (page - 1) * limit;
+
     const usersToHideFromfeedInfo = await ConnectionRequestModel.find({
       $or: [{ toUserId: currentUser._id }, { fromUserId: currentUser._id }],
     });
@@ -91,7 +95,7 @@ userRouter.get("/feed", userAuth, async (req, res) => {
       "about",
       "gender",
       "age",
-    ]);
+    ]).skip(skip).limit(limit);
     console.log(usersToHideFromfeed);
     res.send(usersToHideFromfeed);
   } catch (error) {
