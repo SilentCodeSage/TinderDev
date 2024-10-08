@@ -24,13 +24,15 @@ authRouter.post("/signup", async (req, res) => {
   }
 });
 
-
 //login user
 authRouter.post("/login", async (req, res) => {
+  // add a validator
   const { emailId, password } = req.body;
   const user = await User.findOne({ emailId: emailId });
+
   try {
     //checks if email is valid
+    
     if (!user) {
       throw new Error("Invalid Credentials");
     } else {
@@ -40,7 +42,7 @@ authRouter.post("/login", async (req, res) => {
         //creates a token by ofloading the token creation logic to shcema method
         const token = await user.getJWT();
         res.cookie("token", token);
-        res.send("Login Successfull");
+        res.send(user);
       } else {
         throw new Error("Invalid Credentials");
       }
