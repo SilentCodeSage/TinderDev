@@ -30,9 +30,12 @@ userRouter.get("/user/requests/received", userAuth, async (req, res) => {
 userRouter.get("/user/connections", userAuth, async (req, res) => {
   try {
     const currentUser = req.currentUser;
+    console.log(currentUser);
     const connectionRequests = await ConnectionRequestModel.find({
-      toUserId: currentUser._id,
-      status: "like",
+      $or: [
+        { fromUserId: currentUser._id, status: "accepted" },
+        { toUserId: currentUser._id, status: "accepted" },
+      ],
     })
       .populate("fromUserId", [
         "firstName",
@@ -52,7 +55,6 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
       ]);
 
     console.log(connectionRequests);
-
     const data = connectionRequests.map((row) => {
       if (row.fromUserId._id.toString() === currentUser._id.toString()) {
         return row.toUserId;
@@ -83,21 +85,18 @@ userRouter.get("/feed", userAuth, async (req, res) => {
       usersToHideFromfeed.add(data.toUserId.toString());
     });
 
+    const usersToHideFromFeedArray = Array.from(usersToHideFromfeed);
     const usersToShowInFeed = await User.find({
       $and: [
-        { _id: { $nin: usersToHideFromfeed } },
+        { _id: { $nin: usersToHideFromFeedArray } },
         { _id: { $ne: currentUser._id } },
       ],
-    }).select([
-      "firstName",
-      "lastName",
-      "profileUrl",
-      "about",
-      "gender",
-      "age",
-    ]).skip(skip).limit(limit);
-    console.log(usersToHideFromfeed);
-    res.send(usersToHideFromfeed);
+    })
+      .select(["firstName", "lastName", "profileUrl", "about", "gender", "age","skills"])
+      .skip(skip)
+      .limit(limit);
+    console.log(usersToShowInFeed);
+    res.send(usersToShowInFeed);
   } catch (error) {
     res.send("Error: " + error.message);
   }

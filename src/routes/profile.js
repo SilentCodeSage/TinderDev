@@ -22,12 +22,12 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
     validateProfileEdit(req);
     const currentUser = req.currentUser;
 
-    Object.keys(req.body).forEach((key) => {
+    Object.keys(req.body).forEach((key) => { 
       currentUser[key] = req.body[key];
     });
 
     await currentUser.save();
-    res.send("Updated user profile succesfully\n" + currentUser);
+    res.send(currentUser);
   } catch (error) {
     res.send("Error: " + error.message);
   }

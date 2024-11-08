@@ -44,18 +44,18 @@ authRouter.post("/login", async (req, res) => {
         res.cookie("token", token);
         res.send(user);
       } else {
-        throw new Error("Invalid Credentials");
+        throw new Error();
       }
     }
   } catch (error) {
-    res.send("Error: " + error.message);
+    res.status(500).send("Invalid credentials. Please try again.");
   }
 });
 
 //logout user
-authRouter.post("/logout", async(req,res) =>{
-    res.clearCookie("token");
-    res.send("User Logged Out Succesfully");
-})
-
+authRouter.post("/logout", (req, res) => {
+  res.clearCookie("token"); 
+  res.status(200).send("User Logged Out Successfully");
+});
+ 
 module.exports = authRouter;
