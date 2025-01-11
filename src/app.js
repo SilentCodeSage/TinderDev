@@ -90,7 +90,7 @@ app.patch("/user/:id", async (req, res) => {
 connectDB()
   .then(() => {
     console.log("Connected to the database");
-    app.listen(3002, () => {
+    app.listen(3001, () => {
       console.log("Server @ port 3000");
     });
   })
